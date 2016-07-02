@@ -1,0 +1,111 @@
+---
+title: "Tooth growth Analysis"
+author: "Stefaan Delanghe"
+date: "30 June 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+```
+
+Analysis of the ToothGrowth data in the R datasets package.
+
+The response is the length of odontoblasts (teeth) in each of 10 guinea pigs at each of three dose levels of Vitamin C (0.5, 1, and 2 mg) with each of two delivery methods (orange juice or ascorbic acid).
+
+## Load 
+Loading of the tooth growth dataset
+
+```{r load, echo=TRUE}
+library(datasets)
+data(ToothGrowth)
+```
+
+## Explore
+Exploratory analysis of the tooth growth data set.
+
+```{r summary, echo=TRUE}
+str(ToothGrowth)
+summary(ToothGrowth)
+colnames(ToothGrowth)
+head(ToothGrowth)
+```
+
+Plot of the tooth growth data set.
+```{r toothplot, echo=TRUE}
+library(ggplot2)
+t = ToothGrowth
+levels(t$supp) <- c("Orange juice", "Ascorbic acid")
+ggplot(t, aes(x=factor(dose), y=len)) + 
+  facet_grid(.~supp) +
+  geom_boxplot(aes(fill = supp), show.legend = FALSE) +
+  labs(title="Tooth length by dosage for each type of supplement", 
+    x="Dose (mg/day)",
+    y="Tooth Length")
+```
+
+### Exploratory data anlysis
+The plot shows that an increase in dose affects to the growth of the tooth for both orange juice and ascorbic acid. We notice that the dose is more effective under that of the Orange juice over that of ascorbic acid for the growth of the tooth.
+When the dosage gets up 2mg then the effects are the about the same with orange juice and ascorbic acid. 
+When dosage is lower then 2mg the tooth growth is largerly better with orange juice.
+
+## Confidence intervals
+
+### Group differences due to different supplement type
+Analyse the group differences related to supplement type.
+
+```{r groupdif, echo=TRUE}
+t.test(len ~ supp, paired = F, var.equal = F, data = ToothGrowth)
+```
+
+We can reject the null hpothesis that the different supplement types have no effect on tooth length. We can conclude this due that the p value is 0.06 and the confidence interval has 0.
+
+### Dosage factor
+Analysis of the data of the correlation between the dose and change of tooth growth.
+
+```{r dosefac, echo=TRUE}
+doseFactLow <- subset(ToothGrowth, dose %in% c(0.5, 1.0))
+doseFactMid <- subset(ToothGrowth, dose %in% c(0.5, 2.0))
+doseFactHigh <- subset(ToothGrowth, dose %in% c(1.0, 2.0))
+
+t.test(len ~ dose, paired = F, var.equal = F, data = doseFactLow)
+
+t.test(len ~ dose, paired = F, var.equal = F, data = doseFactMid)
+
+t.test(len ~ dose, paired = F, var.equal = F, data = doseFactHigh)
+
+```
+
+### Supplement factor
+Analysis of the correlation between the dose and change tooth growth.
+```{r suppfact, echo=TRUE}
+supFactLow <- subset(ToothGrowth, dose == 0.5)
+supFactMid <- subset(ToothGrowth, dose == 1.0)
+supFactHigh <- subset(ToothGrowth, dose == 2.0)
+
+t.test(len ~ supp, paired = F, var.equal = F, data = supFactLow)
+
+t.test(len ~ supp, paired = F, var.equal = F, data = supFactMid)
+
+t.test(len ~ supp, paired = F, var.equal = F, data = supFactHigh)
+
+```
+
+There is a substantial correlation between the tooth length and the dose. This because we can reject the null hypothesis based on the 1.72-8,78 for 0.5-1mg, 2.80-9.06 for 1mg and -3.79-3.63 for 2mg.
+The latest confidence interval -3.79-3.63 we can not reject the null hypothesis.
+
+## Conclusion
+
+With the assumptions above we can conclude that a significant difference between the tooth length and the dose between orange juice and ascorbic acid. We have concluded that at 2mg their is not a big difference but for all the other levels (0.5, 1mg) their is a significant difference.
+
+We can say that orange juice is the better dosage delivery but this only up to 2mg. At 2mg their is no difference between the delivery methods. 
+
+### Assumptions
+Following assumptions have been made
+
+* Population is indepedent.
+* Variance between populations are different
+* A random population has been used.
+* The population was composed of similar guinea pigs.
+
